@@ -2,12 +2,15 @@
 ARG BUILD_FROM
 FROM ${BUILD_FROM}
 
-# Install glibc compatibility (required for Go binaries compiled with CGO)
-# The xbslink-ng binary uses glibc, but Alpine uses musl
-RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community glibc glibc-bin
-
 # Install runtime dependencies
 RUN apk add --no-cache libpcap curl
+
+# Install glibc compatibility (required for Go binaries compiled with CGO)
+# The xbslink-ng binary uses glibc, but Alpine uses musl
+RUN curl -fsSL https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub -o /etc/apk/keys/sgerrand.rsa.pub && \
+    curl -fsSL https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r1/glibc-2.35-r1.apk -o /tmp/glibc.apk && \
+    apk add --no-cache --force-overwrite /tmp/glibc.apk && \
+    rm /tmp/glibc.apk
 
 # Download and install xbslink-ng binary from GitHub release
 ARG XBSLINK_VERSION=v0.0.1
