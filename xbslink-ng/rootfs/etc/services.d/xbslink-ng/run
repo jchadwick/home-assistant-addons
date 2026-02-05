@@ -1,0 +1,78 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# Start xbslink-ng service
+# s6-overlay docs: https://github.com/just-containers/s6-overlay
+# ==============================================================================
+
+# Declare variables
+declare mode
+declare interface
+declare xbox_mac
+declare key
+declare log_level
+declare stats_interval
+declare port
+declare peer_address
+
+# Read configuration values
+mode=$(bashio::config 'mode')
+interface=$(bashio::config 'interface')
+xbox_mac=$(bashio::config 'xbox_mac')
+key=$(bashio::config 'key')
+log_level=$(bashio::config 'log_level')
+stats_interval=$(bashio::config 'stats_interval')
+port=$(bashio::config 'port')
+peer_address=$(bashio::config 'peer_address')
+
+# Log startup information
+bashio::log.info "Starting XBSLink-NG..."
+bashio::log.info "Mode: ${mode}"
+bashio::log.info "Interface: ${interface}"
+bashio::log.info "Xbox MAC: ${xbox_mac}"
+bashio::log.info "Log Level: ${log_level}"
+bashio::log.info "Stats Interval: ${stats_interval}s"
+
+# Build command array
+cmd=("xbslink-ng" "${mode}")
+
+# Add common flags
+cmd+=("--interface" "${interface}")
+cmd+=("--xbox-mac" "${xbox_mac}")
+cmd+=("--log" "${log_level}")
+cmd+=("--stats-interval" "${stats_interval}")
+
+# Add optional key if provided
+if bashio::config.has_value 'key'; then
+    cmd+=("--key" "${key}")
+    bashio::log.info "Authentication: enabled"
+else
+    bashio::log.warning "No pre-shared key configured - connection is INSECURE!"
+fi
+
+# Add mode-specific flags
+if [[ "${mode}" == "listen" ]]; then
+    if bashio::config.has_value 'port'; then
+        cmd+=("--port" "${port}")
+        bashio::log.info "Listening on UDP port: ${port}"
+    else
+        bashio::log.error "Listen mode requires 'port' to be configured"
+        exit 1
+    fi
+elif [[ "${mode}" == "connect" ]]; then
+    if bashio::config.has_value 'peer_address'; then
+        cmd+=("--address" "${peer_address}")
+        bashio::log.info "Connecting to peer: ${peer_address}"
+    else
+        bashio::log.error "Connect mode requires 'peer_address' to be configured"
+        exit 1
+    fi
+else
+    bashio::log.error "Invalid mode: ${mode} (must be 'listen' or 'connect')"
+    exit 1
+fi
+
+# Log full command (for debugging)
+bashio::log.debug "Executing: ${cmd[*]}"
+
+# Execute xbslink-ng (replaces this script process)
+exec "${cmd[@]}"

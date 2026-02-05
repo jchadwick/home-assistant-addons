@@ -1,0 +1,32 @@
+configuration:
+  mode:
+    name: Connection Mode
+    description: Choose 'listen' if you have port forwarding, or 'connect' to join a listening peer.
+
+  interface:
+    name: Network Interface
+    description: The network interface where your Xbox is connected (e.g., eth0, wlan0). Use 'ip addr show' to list interfaces.
+
+  xbox_mac:
+    name: Xbox MAC Address
+    description: Your Xbox 360's MAC address in XX:XX:XX:XX:XX:XX format. Find it in Xbox Settings → System → Network Settings → Advanced.
+
+  key:
+    name: Pre-Shared Key
+    description: A secret key that both peers must use. HIGHLY RECOMMENDED for security - without it anyone can inject packets into your network!
+
+  log_level:
+    name: Log Level
+    description: Logging verbosity. Use 'debug' or 'trace' for troubleshooting.
+
+  stats_interval:
+    name: Statistics Interval
+    description: How often (in seconds) to print traffic statistics to the log. Set to 0 to disable.
+
+  port:
+    name: UDP Port (Listen Mode)
+    description: Port to listen on when in 'listen' mode. Forward this port through your router to Home Assistant.
+
+  peer_address:
+    name: Peer Address (Connect Mode)
+    description: The peer's public IP and port in IP:PORT format (e.g., 203.0.113.50:31415) when in 'connect' mode.

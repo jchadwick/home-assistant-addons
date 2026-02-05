@@ -1,0 +1,26 @@
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.pyc
+__pycache__/
+*.egg-info/
+dist/
+build/
+
+# Temporary files
+*.tmp
+*.log
+.tmp/
+
+# Local development
+.env
+local/
