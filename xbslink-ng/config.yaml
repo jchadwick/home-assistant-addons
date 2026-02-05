@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: XBSLink-NG
-version: "1.0.1"
+version: "1.0.2"
 slug: xbslink-ng
 description: P2P bridge for Xbox 360 System Link over the internet
 url: "https://github.com/jchadwick/home-assistant-addons/tree/main/xbslink-ng"
@@ -22,7 +22,7 @@ options:
 schema:
   mode: "list(listen|connect)"
   interface: "str"
-  xbox_mac: "match(^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$)?"
+  xbox_mac: "str?"
   key: "str?"
   log_level: "list(error|warn|info|debug|trace)"
   stats_interval: "int(0,3600)"
