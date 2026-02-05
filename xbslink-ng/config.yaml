@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: XBSLink-NG
-version: "1.0.2"
+version: "1.0.3"
 slug: xbslink-ng
 description: P2P bridge for Xbox 360 System Link over the internet
 url: "https://github.com/jchadwick/home-assistant-addons/tree/main/xbslink-ng"
