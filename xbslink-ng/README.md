@@ -2,7 +2,6 @@
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![Supports amd64](https://img.shields.io/badge/amd64-yes-green.svg)
-![Supports aarch64](https://img.shields.io/badge/aarch64-yes-green.svg)
 
 ## About
 
