@@ -2,11 +2,25 @@
 ARG BUILD_FROM
 FROM ${BUILD_FROM}
 
-# Copy xbslink-ng binary from official image
-COPY --from=ghcr.io/jchadwick/xbslink-ng:latest /xbslink-ng /usr/local/bin/xbslink-ng
+# Install build dependencies
+RUN apk add --no-cache --virtual .build-deps \
+    git \
+    go \
+    gcc \
+    musl-dev \
+    libpcap-dev
 
-# Ensure binary is executable
-RUN chmod +x /usr/local/bin/xbslink-ng
+# Install runtime dependencies
+RUN apk add --no-cache libpcap
+
+# Build xbslink-ng from source
+WORKDIR /tmp/build
+RUN git clone --depth 1 https://github.com/jchadwick/xbslink-ng.git . && \
+    go build -ldflags="-s -w" -o /usr/local/bin/xbslink-ng ./cmd/xbslink-ng && \
+    rm -rf /tmp/build
+
+# Remove build dependencies
+RUN apk del .build-deps
 
 # Copy root filesystem
 COPY rootfs /
