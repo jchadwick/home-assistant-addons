@@ -12,17 +12,17 @@ host_network: true
 options:
   mode: "listen"
   interface: "eth0"
-  xbox_mac: "00:50:F2:00:00:00"
+  xbox_mac: ""
+  peer_address: ""
   key: ""
   log_level: "info"
   stats_interval: 30
   port: 31415
-  peer_address: ""
 
 schema:
   mode: "list(listen|connect)"
   interface: "str"
-  xbox_mac: "match(^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$)"
+  xbox_mac: "match(^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$)?"
   key: "str?"
   log_level: "list(error|warn|info|debug|trace)"
   stats_interval: "int(0,3600)"

@@ -1,15 +1,15 @@
 configuration:
   mode:
-    name: Connection Mode
-    description: Choose 'listen' if you have port forwarding, or 'connect' to join a listening peer.
+    name: Mode
+    description: Choose 'listen' if you are acting as the host, or 'connect' to join a host
 
   interface:
     name: Network Interface
-    description: The network interface where your Xbox is connected (e.g., eth0, wlan0). Use 'ip addr show' to list interfaces.
+    description: The network interface of the network where your Xbox is connected (e.g., eth0, wlan0). Use 'ip addr show' to list interfaces.
 
   xbox_mac:
     name: Xbox MAC Address
-    description: Your Xbox 360's MAC address in XX:XX:XX:XX:XX:XX format. Find it in Xbox Settings → System → Network Settings → Advanced.
+    description: Your Xbox 360's MAC address in XX:XX:XX:XX:XX:XX format. Leave this empty to auto-detect on startup, or specify it if auto-detection fails.
 
   key:
     name: Pre-Shared Key
