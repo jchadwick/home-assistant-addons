@@ -1,0 +1,56 @@
+name: Update XBSLink-NG Version
+
+on:
+  repository_dispatch:
+    types: [xbslink-ng-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'XBSLink-NG version to update to (e.g., v0.0.2)'
+        required: true
+        type: string
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6.0.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
+            VERSION="${{ github.event.client_payload.version }}"
+          else
+            VERSION="${{ inputs.version }}"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Updating to version: ${VERSION}"
+
+          # Strip 'v' prefix for config.yaml (e.g., v0.0.2 -> 0.0.2)
+          VERSION_NO_V="${VERSION#v}"
+          echo "version_no_v=${VERSION_NO_V}" >> $GITHUB_OUTPUT
+
+      - name: Update Dockerfile
+        run: |
+          sed -i "s/ARG XBSLINK_VERSION=.*/ARG XBSLINK_VERSION=${{ steps.version.outputs.version }}/" xbslink-ng/Dockerfile
+          echo "Updated Dockerfile with version ${{ steps.version.outputs.version }}"
+
+      - name: Update config.yaml
+        run: |
+          sed -i "s/version: \".*\"/version: \"${{ steps.version.outputs.version_no_v }}\"/" xbslink-ng/config.yaml
+          echo "Updated config.yaml with version ${{ steps.version.outputs.version_no_v }}"
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add xbslink-ng/Dockerfile xbslink-ng/config.yaml
+          git commit -m "chore(xbslink-ng): update to version ${{ steps.version.outputs.version }}"
+          git push
