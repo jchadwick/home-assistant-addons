@@ -7,16 +7,13 @@ RUN apk add --no-cache libpcap curl
 
 # Download prebuilt xbslink-ng binary
 ARG XBSLINK_VERSION=v0.0.2
-ARG TARGETARCH
+ARG BUILD_ARCH
 
 # Map Home Assistant arch to release artifact arch
-RUN case "${TARGETARCH}" in \
+RUN case "${BUILD_ARCH}" in \
       "amd64") RELEASE_ARCH="amd64" ;; \
-      "armv7") RELEASE_ARCH="armv7" ;; \
-      "arm/v7") RELEASE_ARCH="armv7" ;; \
       "aarch64") RELEASE_ARCH="arm64" ;; \
-      "arm64") RELEASE_ARCH="arm64" ;; \
-      *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
+      *) echo "Unsupported architecture: ${BUILD_ARCH}" && exit 1 ;; \
     esac && \
     echo "Downloading xbslink-ng ${XBSLINK_VERSION} for linux-${RELEASE_ARCH}..." && \
     curl -fsSL "https://github.com/jchadwick/xbslink-ng/releases/download/${XBSLINK_VERSION}/xbslink-ng-linux-${RELEASE_ARCH}.tar.gz" -o /tmp/xbslink-ng.tar.gz && \
