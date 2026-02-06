@@ -2,28 +2,28 @@
 ARG BUILD_FROM
 FROM ${BUILD_FROM}
 
-# Install build dependencies
-RUN apk add --no-cache --virtual .build-deps \
-    git \
-    go \
-    gcc \
-    musl-dev \
-    libpcap-dev
-
 # Install runtime dependencies
-RUN apk add --no-cache libpcap
+RUN apk add --no-cache libpcap curl
 
-# Build xbslink-ng from source with musl (static linking)
+# Download prebuilt xbslink-ng binary
 ARG XBSLINK_VERSION=v0.0.2
-RUN git clone --depth 1 --branch ${XBSLINK_VERSION} https://github.com/jchadwick/xbslink-ng.git /tmp/xbslink-ng && \
-    cd /tmp/xbslink-ng && \
-    CGO_ENABLED=1 go build -ldflags="-s -w -linkmode external -extldflags '-static'" -o /usr/local/bin/xbslink-ng ./cmd/xbslink-ng && \
-    chmod +x /usr/local/bin/xbslink-ng && \
-    cd / && \
-    rm -rf /tmp/xbslink-ng
+ARG TARGETARCH
 
-# Remove build dependencies
-RUN apk del .build-deps
+# Map Home Assistant arch to release artifact arch
+RUN case "${TARGETARCH}" in \
+      "amd64") RELEASE_ARCH="amd64" ;; \
+      "armv7") RELEASE_ARCH="armv7" ;; \
+      "arm/v7") RELEASE_ARCH="armv7" ;; \
+      "aarch64") RELEASE_ARCH="arm64" ;; \
+      "arm64") RELEASE_ARCH="arm64" ;; \
+      *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
+    esac && \
+    echo "Downloading xbslink-ng ${XBSLINK_VERSION} for linux-${RELEASE_ARCH}..." && \
+    curl -fsSL "https://github.com/jchadwick/xbslink-ng/releases/download/${XBSLINK_VERSION}/xbslink-ng-linux-${RELEASE_ARCH}.tar.gz" -o /tmp/xbslink-ng.tar.gz && \
+    tar -xzf /tmp/xbslink-ng.tar.gz -C /tmp && \
+    mv /tmp/xbslink-ng /usr/local/bin/xbslink-ng && \
+    chmod +x /usr/local/bin/xbslink-ng && \
+    rm -f /tmp/xbslink-ng.tar.gz
 
 # Copy root filesystem
 COPY rootfs /

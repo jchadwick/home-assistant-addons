@@ -6,6 +6,8 @@ description: P2P bridge for Xbox 360 System Link over the internet
 url: "https://github.com/jchadwick/home-assistant-addons/tree/main/xbslink-ng"
 arch:
   - amd64
+  - armv7
+  - aarch64
 init: false
 host_network: true
 
