@@ -1,23 +1,27 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: XBSLink-NG
-version: "0.0.2"
+version: "0.0.3"
 slug: xbslink-ng
 description: P2P bridge for Xbox 360 System Link over the internet
 url: "https://github.com/jchadwick/home-assistant-addons/tree/main/xbslink-ng"
+image: "ghcr.io/jchadwick/{arch}-addon-xbslink-ng"
 arch:
   - amd64
   - aarch64
 init: false
 host_network: true
+privileged:
+  - NET_RAW
+  - NET_ADMIN
 
 options:
   mode: "listen"
-  interface: "eth0"
-  xbox_mac: ""
-  peer_address: ""
+  interface: "enp1s0"
   key: ""
+  peer_address: ""
+  xbox_mac: ""
   log_level: "info"
-  stats_interval: 30
+  stats_interval: 5
   port: 31415
 
 schema:
@@ -29,9 +33,3 @@ schema:
   stats_interval: "int(0,3600)"
   port: "port?"
   peer_address: "str?"
-
-privileged:
-  - NET_RAW
-  - NET_ADMIN
-
-image: "ghcr.io/jchadwick/{arch}-addon-xbslink-ng"

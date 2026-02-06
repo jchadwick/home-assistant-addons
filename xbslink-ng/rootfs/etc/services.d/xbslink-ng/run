@@ -4,6 +4,9 @@
 # s6-overlay docs: https://github.com/just-containers/s6-overlay
 # ==============================================================================
 
+# Set HOME to /data so xbslink-ng can create its config directory
+export HOME=/data
+
 # Declare variables
 declare mode
 declare interface

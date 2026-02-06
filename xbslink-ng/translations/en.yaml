@@ -5,11 +5,11 @@ configuration:
 
   interface:
     name: Network Interface
-    description: The network interface of the network where your Xbox is connected (e.g., eth0, wlan0). Use 'ip addr show' to list interfaces.
+    description: The network interface of the network where your Xbox is connected (e.g., eth0, wlan0). Use 'ha network info' to list interfaces.
 
   xbox_mac:
     name: Xbox MAC Address
-    description: Your Xbox 360's MAC address in XX:XX:XX:XX:XX:XX format. Leave this empty to auto-detect on startup, or specify it if auto-detection fails.
+    description: Your Xbox MAC address. Leave this empty to auto-detect on startup, or specify it if auto-detection fails.
 
   key:
     name: Pre-Shared Key
@@ -28,5 +28,5 @@ configuration:
     description: Port to listen on when in 'listen' mode. Forward this port through your router to Home Assistant.
 
   peer_address:
-    name: Peer Address (Connect Mode)
-    description: The peer's public IP and port in IP:PORT format (e.g., 203.0.113.50:31415) when in 'connect' mode.
+    name: Host Address (Connect Mode)
+    description: The host's public IP or DNS name and port in IP:PORT format (e.g., 203.0.113.50:31415) when in 'connect' mode.
