@@ -2,7 +2,7 @@
 
 All notable changes to this add-on will be documented in this file.
 
-## [1.0.0] - 2026-02-05
+## [2026.2.0] - 2026-02-05
 
 ### Added
 - Initial release of XBSLink-NG Home Assistant add-on
