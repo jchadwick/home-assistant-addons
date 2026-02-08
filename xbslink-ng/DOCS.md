@@ -1,16 +1,16 @@
 # Home Assistant Add-on: XBSLink-NG
 
-Connect two Xbox 360 consoles over the internet for System Link gaming with low latency.
+Connect two Xbox consoles over the internet for System Link gaming with low latency.
 
 ## About
 
-XBSLink-NG is a lightweight P2P bridge that tunnels Xbox 360 System Link traffic between two locations over the internet. Unlike services like XLink Kai, this creates a **direct peer-to-peer connection** between you and your friend, giving you the lowest possible latency.
+XBSLink-NG is a lightweight P2P bridge that tunnels Xbox System Link traffic between two locations over the internet. Unlike services like XLink Kai, this creates a **direct peer-to-peer connection** between you and your friend, giving you the lowest possible latency.
 
 ## Prerequisites
 
-- Xbox 360 connected to the same network as your Home Assistant instance
+- Xbox connected to the same network as your Home Assistant instance
 - One person must be able to **port forward** a UDP port through their router
-- Internet connection with <30ms latency between locations (Xbox 360 requirement)
+- Internet connection with <30ms latency between locations (Xbox requirement)
 
 ## Installation
 
@@ -37,7 +37,7 @@ Common interface names:
 
 ### Finding Your Xbox MAC Address
 
-On Xbox 360:
+On Xbox:
 1. Go to Settings → System → Network Settings
 2. Select Configure Network
 3. Choose Additional Settings → Advanced Settings
@@ -58,7 +58,7 @@ The network interface name where your Xbox is connected (e.g., `eth0`, `eth1`, `
 
 #### xbox_mac (required)
 
-Your Xbox 360's MAC address in XX:XX:XX:XX:XX:XX format (e.g., `00:50:F2:1A:2B:3C`).
+Your Xbox's MAC address in XX:XX:XX:XX:XX:XX format (e.g., `00:50:F2:1A:2B:3C`).
 
 #### key (optional but strongly recommended)
 
@@ -141,7 +141,7 @@ The peer's public IP address and port in the format `IP:PORT` (e.g., `203.0.113.
 
 ### High latency or disconnections
 
-- Xbox 360 requires <30ms round-trip time
+- Xbox requires <30ms round-trip time
 - Check your internet connection speed
 - Try switching who does port forwarding (routing may be asymmetric)
 - Close bandwidth-heavy applications

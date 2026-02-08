@@ -2,7 +2,7 @@
 name: XBSLink-NG
 version: "0.0.3"
 slug: xbslink-ng
-description: P2P bridge for Xbox 360 System Link over the internet
+description: P2P bridge for Xbox System Link over the internet
 url: "https://github.com/jchadwick/home-assistant-addons/tree/main/xbslink-ng"
 image: "ghcr.io/jchadwick/{arch}-addon-xbslink-ng"
 arch:

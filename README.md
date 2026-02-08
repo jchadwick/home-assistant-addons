@@ -16,7 +16,7 @@ This repository contains the following add-ons:
 ![Supports armv7 Architecture][armv7-shield]
 ![Supports i386 Architecture][i386-shield]
 
-P2P bridge for Xbox 360 System Link over the internet. Connect two Xbox 360 consoles for local multiplayer gaming with low latency using a direct peer-to-peer connection.
+P2P bridge for Xbox System Link over the internet. Connect two Xbox consoles for local multiplayer gaming with low latency using a direct peer-to-peer connection.
 
 ## Installation
 
