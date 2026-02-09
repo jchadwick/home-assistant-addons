@@ -99,6 +99,11 @@ while IFS= read -r line; do
                 mqtt_pub "${TOPIC_PREFIX}/connection/state" "ON"
             else
                 mqtt_pub "${TOPIC_PREFIX}/connection/state" "OFF"
+                # Zero out stats and RTT on disconnect
+                mqtt_pub "${TOPIC_PREFIX}/stats/state" \
+                    "{\"tx_packets\":0,\"tx_bytes\":0,\"rx_packets\":0,\"rx_bytes\":0}"
+                mqtt_pub "${TOPIC_PREFIX}/rtt/state" \
+                    "{\"current\":0,\"average\":0}"
             fi
             ;;
         stats)
