@@ -36,6 +36,30 @@ If you have issues with a specific add-on, please open an issue on this reposito
 - Log output showing the error
 - Steps to reproduce
 
+## Releasing Add-ons
+
+Releases use auto-incrementing CalVer versioning (YYYY.MM.MICRO).
+
+### Updating xbslink-ng to a New Binary Version
+
+When a new [xbslink-ng binary release](https://github.com/jchadwick/xbslink-ng/releases) is published:
+
+1. Edit `xbslink-ng/Dockerfile` and update `XBSLINK_VERSION=v0.0.X` to the new tag
+2. Commit: `git commit -m "fix(xbslink-ng): update binary to v0.0.X"`
+3. Push to `main`
+4. CI automatically bumps the addon version and deploys to GHCR
+
+### Manual Changes
+
+For addon configuration, scripts, or other changes:
+
+1. Make your changes to `xbslink-ng/` files
+2. Commit with conventional commit message (e.g., `feat(xbslink-ng): add new option`)
+3. Push to `main`
+4. CI automatically bumps the version and deploys
+
+The version in `config.yaml` is auto-updated by CI — no manual version changes needed.
+
 ## Contributing
 
 Contributions are welcome! Please open a pull request with your changes.
