@@ -11,7 +11,7 @@ Connect two Xbox consoles over the internet for System Link gaming with the lowe
 - ✅ Pre-shared key authentication for security
 - ✅ Real-time statistics and monitoring
 - ✅ AppArmor security profile
-- ✅ Multi-architecture support
+- ✅ Multi-architecture support (amd64, aarch64)
 - ✅ MQTT integration for Home Assistant sensors
 
 ## Prerequisites
