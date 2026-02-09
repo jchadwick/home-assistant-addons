@@ -18,7 +18,6 @@ rm -f "${PIPE_PATH}"
 # Only create the pipe if mqtt_enabled is true AND the MQTT service is available
 if bashio::config.true 'mqtt_enabled' && bashio::services "mqtt"; then
     mkfifo "${PIPE_PATH}"
-    chmod 666 "${PIPE_PATH}"
     bashio::log.info "Created events pipe at ${PIPE_PATH}"
 else
     bashio::log.info "MQTT disabled or unavailable, skipping events pipe"

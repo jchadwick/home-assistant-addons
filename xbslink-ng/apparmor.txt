@@ -84,5 +84,11 @@ profile xbslink-ng flags=(attach_disconnected,mediate_deleted) {
 
     # Temporary files
     /tmp/** rwk,
+
+    # Addon data directory (config persistence)
+    /data/** rw,
+
+    # Events FIFO pipe for MQTT bridge IPC
+    /run/xbslink-events.pipe w,
   }
 }

@@ -4,6 +4,13 @@ All notable changes to this add-on will be documented in this file.
 
 Versioning follows CalVer (YYYY.MM.MICRO).
 
+## [2026.2.6] - 2026-02-09
+
+### Fixed
+- AppArmor child profile missing `/data/` and `/run/xbslink-events.pipe` write access, causing "permission denied" for the Go binary
+- Removed ineffective `chmod 666` on FIFO pipe (AppArmor MAC overrides POSIX DAC)
+
+
 ## [2026.2.5] - 2026-02-09
 
 ### Changed
