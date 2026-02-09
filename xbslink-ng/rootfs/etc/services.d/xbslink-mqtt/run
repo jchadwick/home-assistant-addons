@@ -1,0 +1,136 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# MQTT bridge sidecar: reads JSON Line events from FIFO and publishes to MQTT
+# ==============================================================================
+
+PIPE_PATH="/run/xbslink-events.pipe"
+TOPIC_PREFIX="xbslink-ng"
+DEVICE_ID="xbslink_ng"
+
+# ---- Guard: exit cleanly if MQTT is disabled or unavailable ----
+if ! bashio::config.true 'mqtt_enabled'; then
+    bashio::log.info "MQTT bridge disabled (mqtt_enabled is false)"
+    exec s6-svc -Od .
+fi
+
+if ! bashio::services "mqtt"; then
+    bashio::log.warning "MQTT service not available, MQTT bridge exiting"
+    exec s6-svc -Od .
+fi
+
+if [[ ! -p "${PIPE_PATH}" ]]; then
+    bashio::log.warning "Events pipe not found at ${PIPE_PATH}, MQTT bridge exiting"
+    exec s6-svc -Od .
+fi
+
+# ---- Get MQTT credentials ----
+MQTT_HOST=$(bashio::services mqtt "host")
+MQTT_PORT=$(bashio::services mqtt "port")
+MQTT_USER=$(bashio::services mqtt "username")
+MQTT_PASS=$(bashio::services mqtt "password")
+
+bashio::log.info "MQTT bridge starting (${MQTT_HOST}:${MQTT_PORT})"
+
+# Helper: publish to MQTT (silently drop errors for resilience)
+mqtt_pub() {
+    local topic="$1"
+    local payload="$2"
+    local retain="${3:-}"
+    local args=(-h "${MQTT_HOST}" -p "${MQTT_PORT}" -u "${MQTT_USER}" -P "${MQTT_PASS}" -t "${topic}" -m "${payload}")
+    if [[ "${retain}" == "retain" ]]; then
+        args+=(-r)
+    fi
+    mosquitto_pub "${args[@]}" 2>/dev/null || true
+}
+
+# ---- Publish MQTT Discovery messages (retained) ----
+# Common device block shared by all entities
+DEVICE_JSON='"device":{"identifiers":["'"${DEVICE_ID}"'"],"name":"XBSLink-NG","manufacturer":"xbslink-ng","model":"P2P System Link Bridge"}'
+
+# Connection binary_sensor
+mqtt_pub "homeassistant/binary_sensor/${DEVICE_ID}/connection/config" \
+    "{${DEVICE_JSON},\"unique_id\":\"${DEVICE_ID}_connection\",\"name\":\"Connection\",\"state_topic\":\"${TOPIC_PREFIX}/connection/state\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"device_class\":\"connectivity\"}" \
+    retain
+
+# Current RTT sensor
+mqtt_pub "homeassistant/sensor/${DEVICE_ID}/rtt_current/config" \
+    "{${DEVICE_JSON},\"unique_id\":\"${DEVICE_ID}_rtt_current\",\"name\":\"Current RTT\",\"state_topic\":\"${TOPIC_PREFIX}/rtt/state\",\"value_template\":\"{{ value_json.current }}\",\"unit_of_measurement\":\"ms\",\"icon\":\"mdi:timer-outline\"}" \
+    retain
+
+# Average RTT sensor
+mqtt_pub "homeassistant/sensor/${DEVICE_ID}/rtt_average/config" \
+    "{${DEVICE_JSON},\"unique_id\":\"${DEVICE_ID}_rtt_average\",\"name\":\"Average RTT\",\"state_topic\":\"${TOPIC_PREFIX}/rtt/state\",\"value_template\":\"{{ value_json.average }}\",\"unit_of_measurement\":\"ms\",\"icon\":\"mdi:timer-sand\"}" \
+    retain
+
+# TX Packets sensor
+mqtt_pub "homeassistant/sensor/${DEVICE_ID}/tx_packets/config" \
+    "{${DEVICE_JSON},\"unique_id\":\"${DEVICE_ID}_tx_packets\",\"name\":\"TX Packets\",\"state_topic\":\"${TOPIC_PREFIX}/stats/state\",\"value_template\":\"{{ value_json.tx_packets }}\",\"icon\":\"mdi:upload-network\"}" \
+    retain
+
+# RX Packets sensor
+mqtt_pub "homeassistant/sensor/${DEVICE_ID}/rx_packets/config" \
+    "{${DEVICE_JSON},\"unique_id\":\"${DEVICE_ID}_rx_packets\",\"name\":\"RX Packets\",\"state_topic\":\"${TOPIC_PREFIX}/stats/state\",\"value_template\":\"{{ value_json.rx_packets }}\",\"icon\":\"mdi:download-network\"}" \
+    retain
+
+# TX Bytes sensor
+mqtt_pub "homeassistant/sensor/${DEVICE_ID}/tx_bytes/config" \
+    "{${DEVICE_JSON},\"unique_id\":\"${DEVICE_ID}_tx_bytes\",\"name\":\"TX Bytes\",\"state_topic\":\"${TOPIC_PREFIX}/stats/state\",\"value_template\":\"{{ value_json.tx_bytes }}\",\"unit_of_measurement\":\"B\",\"icon\":\"mdi:upload\"}" \
+    retain
+
+# RX Bytes sensor
+mqtt_pub "homeassistant/sensor/${DEVICE_ID}/rx_bytes/config" \
+    "{${DEVICE_JSON},\"unique_id\":\"${DEVICE_ID}_rx_bytes\",\"name\":\"RX Bytes\",\"state_topic\":\"${TOPIC_PREFIX}/stats/state\",\"value_template\":\"{{ value_json.rx_bytes }}\",\"unit_of_measurement\":\"B\",\"icon\":\"mdi:download\"}" \
+    retain
+
+bashio::log.info "MQTT discovery messages published"
+
+# ---- Set initial state: disconnected ----
+mqtt_pub "${TOPIC_PREFIX}/connection/state" "OFF"
+
+# ---- Read JSON Lines from FIFO and dispatch ----
+while IFS= read -r line; do
+    # Extract event type using lightweight JSON parsing
+    event_type=$(echo "${line}" | sed -n 's/.*"type":"\([^"]*\)".*/\1/p')
+
+    case "${event_type}" in
+        state_changed)
+            state=$(echo "${line}" | sed -n 's/.*"state":"\([^"]*\)".*/\1/p')
+            if [[ "${state}" == "CONNECTED" ]]; then
+                mqtt_pub "${TOPIC_PREFIX}/connection/state" "ON"
+            else
+                mqtt_pub "${TOPIC_PREFIX}/connection/state" "OFF"
+            fi
+            ;;
+        stats)
+            # Extract stats fields and publish as JSON
+            tx_packets=$(echo "${line}" | sed -n 's/.*"tx_packets":\([0-9]*\).*/\1/p')
+            tx_bytes=$(echo "${line}" | sed -n 's/.*"tx_bytes":\([0-9]*\).*/\1/p')
+            rx_packets=$(echo "${line}" | sed -n 's/.*"rx_packets":\([0-9]*\).*/\1/p')
+            rx_bytes=$(echo "${line}" | sed -n 's/.*"rx_bytes":\([0-9]*\).*/\1/p')
+            rtt_current=$(echo "${line}" | sed -n 's/.*"rtt_current_ms":\([0-9.]*\).*/\1/p')
+            rtt_avg=$(echo "${line}" | sed -n 's/.*"rtt_avg_ms":\([0-9.]*\).*/\1/p')
+
+            mqtt_pub "${TOPIC_PREFIX}/stats/state" \
+                "{\"tx_packets\":${tx_packets:-0},\"tx_bytes\":${tx_bytes:-0},\"rx_packets\":${rx_packets:-0},\"rx_bytes\":${rx_bytes:-0}}"
+            mqtt_pub "${TOPIC_PREFIX}/rtt/state" \
+                "{\"current\":${rtt_current:-0},\"average\":${rtt_avg:-0}}"
+            ;;
+        latency)
+            rtt_ms=$(echo "${line}" | sed -n 's/.*"rtt_ms":\([0-9.]*\).*/\1/p')
+            rtt_avg=$(echo "${line}" | sed -n 's/.*"rtt_avg_ms":\([0-9.]*\).*/\1/p')
+            # Only update RTT on latency events if we have a value
+            if [[ -n "${rtt_ms}" ]]; then
+                mqtt_pub "${TOPIC_PREFIX}/rtt/state" \
+                    "{\"current\":${rtt_ms},\"average\":${rtt_avg:-${rtt_ms}}}"
+            fi
+            ;;
+        error)
+            # Errors are logged but not published to a specific sensor
+            bashio::log.warning "Bridge error event: ${line}"
+            ;;
+    esac
+done < "${PIPE_PATH}"
+
+# ---- EOF: binary exited, set connection OFF and exit (s6 will restart us) ----
+bashio::log.info "Events pipe closed (binary exited), setting connection OFF"
+mqtt_pub "${TOPIC_PREFIX}/connection/state" "OFF"

@@ -1,0 +1,11 @@
+#!/usr/bin/env bashio
+# ==============================================================================
+# MQTT bridge finish script - log but do NOT halt the container
+# The MQTT sidecar is non-critical; the main bridge runs fine without it.
+# ==============================================================================
+
+declare APP_EXIT_CODE=${1}
+
+if [[ "${APP_EXIT_CODE}" -ne 0 ]] && [[ "${APP_EXIT_CODE}" -ne 256 ]]; then
+    bashio::log.warning "MQTT bridge exited with code ${APP_EXIT_CODE}"
+fi

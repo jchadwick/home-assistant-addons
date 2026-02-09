@@ -3,7 +3,7 @@ ARG BUILD_FROM
 FROM ${BUILD_FROM}
 
 # Install runtime dependencies
-RUN apk add --no-cache libpcap curl
+RUN apk add --no-cache libpcap curl mosquitto-clients
 
 # Download prebuilt xbslink-ng binary
 ARG XBSLINK_VERSION=v0.0.2

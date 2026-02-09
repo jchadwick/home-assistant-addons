@@ -2,7 +2,7 @@
 name: XBSLink-NG
 version: "0.0.4"
 slug: xbslink-ng
-description: P2P bridge for Xbox 360 System Link over the internet
+description: P2P bridge for Xbox System Link over the internet
 url: "https://github.com/jchadwick/home-assistant-addons/tree/main/xbslink-ng"
 image: "ghcr.io/jchadwick/{arch}-addon-xbslink-ng"
 arch:
@@ -13,6 +13,8 @@ host_network: true
 privileged:
   - NET_RAW
   - NET_ADMIN
+services:
+  - mqtt:want
 
 options:
   mode: "listen"
@@ -23,6 +25,7 @@ options:
   log_level: "info"
   stats_interval: 5
   port: 31415
+  mqtt_enabled: false
 
 schema:
   mode: "list(listen|connect)"
@@ -33,3 +36,4 @@ schema:
   stats_interval: "int(0,3600)"
   port: "port?"
   peer_address: "str?"
+  mqtt_enabled: "bool?"

@@ -30,3 +30,7 @@ configuration:
   peer_address:
     name: Host Address (Connect Mode)
     description: The host's public IP or DNS name and port in IP:PORT format (e.g., 203.0.113.50:31415) when in 'connect' mode.
+
+  mqtt_enabled:
+    name: Enable MQTT Sensors
+    description: Publish connection status, latency, and traffic statistics as Home Assistant sensor entities via MQTT. Requires the Mosquitto broker add-on.

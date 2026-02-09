@@ -74,6 +74,12 @@ else
     exit 1
 fi
 
+# Add events output if the FIFO pipe exists (created by cont-init.d when MQTT is enabled)
+if [[ -p /run/xbslink-events.pipe ]]; then
+    cmd+=("--events-output" "/run/xbslink-events.pipe")
+    bashio::log.info "Events output: /run/xbslink-events.pipe"
+fi
+
 # Log full command (for debugging)
 bashio::log.debug "Executing: ${cmd[*]}"
 
