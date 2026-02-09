@@ -11,6 +11,10 @@ on:
   pull_request:
     branches:
       - main
+  workflow_run:
+    workflows: ["Auto Version Bump"]
+    types:
+      - completed
 
 jobs:
   init:
