@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'xbslink-ng/**'
-      - '!xbslink-ng/config.yaml'  # Don't trigger on version bumps themselves
 
 jobs:
   bump-version:
@@ -14,13 +13,25 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Check if this is a version bump commit
+        id: check_commit
+        run: |
+          if [[ "${{ github.event.head_commit.message }}" == *"[skip ci]"* ]] || [[ "${{ github.event.head_commit.message }}" == *"bump version"* ]]; then
+            echo "This is a version bump commit, skipping"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Check out repository
+        if: steps.check_commit.outputs.skip != 'true'
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Get current version
+        if: steps.check_commit.outputs.skip != 'true'
         id: current_version
         run: |
           VERSION=$(grep '^version:' xbslink-ng/config.yaml | sed 's/version: "\(.*\)"/\1/')
@@ -28,6 +39,7 @@ jobs:
           echo "Current version: $VERSION"
 
       - name: Calculate new version (CalVer YYYY.MM.MICRO)
+        if: steps.check_commit.outputs.skip != 'true'
         id: new_version
         run: |
           CURRENT="${{ steps.current_version.outputs.version }}"
@@ -50,10 +62,12 @@ jobs:
           echo "New version: $NEW_VERSION"
 
       - name: Update config.yaml
+        if: steps.check_commit.outputs.skip != 'true'
         run: |
           sed -i 's/^version: ".*"/version: "${{ steps.new_version.outputs.version }}"/' xbslink-ng/config.yaml
 
       - name: Update CHANGELOG.md
+        if: steps.check_commit.outputs.skip != 'true'
         run: |
           DATE=$(date +%Y-%m-%d)
           NEW_VERSION="${{ steps.new_version.outputs.version }}"
@@ -71,6 +85,7 @@ EOF
           sed -i "/^Versioning follows CalVer/r /tmp/new_entry.md" xbslink-ng/CHANGELOG.md
 
       - name: Commit and push version bump
+        if: steps.check_commit.outputs.skip != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
