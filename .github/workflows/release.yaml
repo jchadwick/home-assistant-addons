@@ -1,37 +1,28 @@
-name: Auto Version Bump
+name: Release
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches:
       - main
-    paths:
-      - 'xbslink-ng/**'
 
 jobs:
-  bump-version:
+  version-and-deploy:
+    name: Version Bump & Deploy
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: write
+      packages: write
     steps:
-      - name: Check if this is a version bump commit
-        id: check_commit
-        run: |
-          if [[ "${{ github.event.head_commit.message }}" == *"[skip ci]"* ]] || [[ "${{ github.event.head_commit.message }}" == *"bump version"* ]]; then
-            echo "This is a version bump commit, skipping"
-            echo "skip=true" >> $GITHUB_OUTPUT
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Check out repository
-        if: steps.check_commit.outputs.skip != 'true'
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Get current version
-        if: steps.check_commit.outputs.skip != 'true'
         id: current_version
         run: |
           VERSION=$(grep '^version:' xbslink-ng/config.yaml | sed 's/version: "\(.*\)"/\1/')
@@ -39,21 +30,17 @@ jobs:
           echo "Current version: $VERSION"
 
       - name: Calculate new version (CalVer YYYY.MM.MICRO)
-        if: steps.check_commit.outputs.skip != 'true'
         id: new_version
         run: |
           CURRENT="${{ steps.current_version.outputs.version }}"
           YEAR=$(date +%Y)
           MONTH=$(date +%-m)
 
-          # Extract current year, month, micro
           IFS='.' read -r CUR_YEAR CUR_MONTH CUR_MICRO <<< "$CURRENT"
 
           if [[ "$CUR_YEAR" == "$YEAR" ]] && [[ "$CUR_MONTH" == "$MONTH" ]]; then
-            # Same month - increment micro
             NEW_MICRO=$((CUR_MICRO + 1))
           else
-            # New month - reset micro to 0
             NEW_MICRO=0
           fi
 
@@ -62,33 +49,42 @@ jobs:
           echo "New version: $NEW_VERSION"
 
       - name: Update config.yaml
-        if: steps.check_commit.outputs.skip != 'true'
         run: |
           sed -i 's/^version: ".*"/version: "${{ steps.new_version.outputs.version }}"/' xbslink-ng/config.yaml
+          cat xbslink-ng/config.yaml | grep version
 
       - name: Update CHANGELOG.md
-        if: steps.check_commit.outputs.skip != 'true'
         run: |
           DATE=$(date +%Y-%m-%d)
           NEW_VERSION="${{ steps.new_version.outputs.version }}"
 
-          # Create new changelog entry
-          cat > /tmp/new_entry.md <<EOF
-## [$NEW_VERSION] - $DATE
+          # Create temp file with new entry
+          echo "" > /tmp/new_entry.md
+          echo "## [$NEW_VERSION] - $DATE" >> /tmp/new_entry.md
+          echo "" >> /tmp/new_entry.md
+          echo "### Changed" >> /tmp/new_entry.md
+          echo "- Auto-deployed from main branch" >> /tmp/new_entry.md
+          echo "" >> /tmp/new_entry.md
 
-### Changed
-- Auto-deployed from main branch
+          # Insert after the CalVer line
+          awk '/^Versioning follows CalVer/ { print; system("cat /tmp/new_entry.md"); next }1' xbslink-ng/CHANGELOG.md > /tmp/changelog_new.md
+          mv /tmp/changelog_new.md xbslink-ng/CHANGELOG.md
 
-EOF
-
-          # Insert after the "Versioning follows CalVer" line
-          sed -i "/^Versioning follows CalVer/r /tmp/new_entry.md" xbslink-ng/CHANGELOG.md
-
-      - name: Commit and push version bump
-        if: steps.check_commit.outputs.skip != 'true'
+      - name: Commit version bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add xbslink-ng/config.yaml xbslink-ng/CHANGELOG.md
-          git commit -m "chore(xbslink-ng): bump version to ${{ steps.new_version.outputs.version }} [skip ci]"
+          git commit -m "chore(xbslink-ng): bump version to ${{ steps.new_version.outputs.version }}"
           git push
+
+      - name: Build and push all architectures
+        uses: home-assistant/builder@2025.11.0
+        with:
+          args: |
+            --all \
+            --target /data/xbslink-ng \
+            --docker-hub "ghcr.io/${{ github.repository_owner }}"
+        env:
+          DOCKER_USERNAME: ${{ github.repository_owner }}
+          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
