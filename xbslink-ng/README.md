@@ -5,7 +5,7 @@
 
 ## About
 
-Connect two Xbox consoles over the internet for System Link gaming with the lowest possible latency. XBSLink-NG creates a direct peer-to-peer connection between you and your friend, bypassing centralized servers for optimal performance.
+Connect two Xbox 360 consoles over the internet for System Link gaming with the lowest possible latency. XBSLink-NG creates a direct peer-to-peer connection between you and your friend, bypassing centralized servers for optimal performance.
 
 ## Features
 
@@ -18,7 +18,7 @@ Connect two Xbox consoles over the internet for System Link gaming with the lowe
 
 ## Prerequisites
 
-- Xbox connected to the same network as Home Assistant
+- Xbox 360 connected to the same network as Home Assistant
 - One person must be able to port forward a UDP port
 - Internet connection with <30ms latency between locations
 

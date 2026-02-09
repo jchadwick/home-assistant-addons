@@ -2,53 +2,20 @@
 # ==============================================================================
 # Take down the S6 supervision tree when xbslink-ng fails
 # s6-overlay docs: https://github.com/just-containers/s6-overlay
-#
-# $1 = exit code of the process
-# $2 = signal number that killed the process (0 if exited normally)
 # ==============================================================================
 
 declare APP_EXIT_CODE=${1}
-declare SIGNAL=${2:-0}
 
-# Signal-based exit — check which signal killed the process
-if [[ "${SIGNAL}" -ne 0 ]]; then
-    case "${SIGNAL}" in
-        15) # SIGTERM — normal container shutdown
-            bashio::log.info "XBSLink-NG stopped (SIGTERM — normal shutdown)"
-            ;;
-        9)  # SIGKILL
-            bashio::log.warning "XBSLink-NG was killed (SIGKILL)"
-            bashio::log.warning "Interface state: $(ip -brief link show 2>/dev/null || echo 'unavailable')"
-            bashio::log.warning "Memory: $(free -m 2>/dev/null | grep -i mem || echo 'unavailable')"
-            ;;
-        11) # SIGSEGV
-            bashio::log.error "XBSLink-NG crashed (SIGSEGV — segmentation fault)"
-            bashio::log.error "Interface state: $(ip -brief link show 2>/dev/null || echo 'unavailable')"
-            bashio::log.error "Memory: $(free -m 2>/dev/null | grep -i mem || echo 'unavailable')"
-            ;;
-        *)
-            bashio::log.warning "XBSLink-NG killed by signal ${SIGNAL}"
-            ;;
-    esac
-    echo "${APP_EXIT_CODE}" > /run/s6-linux-init-container-results/exitcode
-    exec /run/s6/basedir/bin/halt
-fi
-
-# Exit-code-based handling
 if [[ "${APP_EXIT_CODE}" -ne 0 ]] && [[ "${APP_EXIT_CODE}" -ne 256 ]]; then
-    bashio::log.warning "XBSLink-NG exited with code ${APP_EXIT_CODE}"
+  bashio::log.warning "XBSLink-NG exited with code ${APP_EXIT_CODE}"
 
-    case "${APP_EXIT_CODE}" in
-        1)
-            bashio::log.error "Configuration error — check your add-on settings"
-            ;;
-        2)
-            bashio::log.error "Invalid arguments — this may be a bug, please report it"
-            ;;
-    esac
+  # Exit code 1 usually means configuration error
+  if [[ "${APP_EXIT_CODE}" -eq 1 ]]; then
+    bashio::log.error "Configuration error - check your settings"
+  fi
 
-    echo "${APP_EXIT_CODE}" > /run/s6-linux-init-container-results/exitcode
-    exec /run/s6/basedir/bin/halt
+  echo "${APP_EXIT_CODE}" > /run/s6-linux-init-container-results/exitcode
+  exec /run/s6/basedir/bin/halt
 fi
 
 bashio::log.info "XBSLink-NG service restarting..."

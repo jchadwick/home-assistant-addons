@@ -3,27 +3,9 @@
 # Start xbslink-ng service
 # s6-overlay docs: https://github.com/just-containers/s6-overlay
 # ==============================================================================
-set -e
 
 # Set HOME to /data so xbslink-ng can create its config directory
 export HOME=/data
-
-# --- Pre-flight checks ---
-
-# Verify binary exists and is executable
-if ! command -v xbslink-ng > /dev/null 2>&1; then
-    bashio::log.fatal "xbslink-ng binary not found or not executable"
-    exit 1
-fi
-
-# Verify /data is writable and pre-create config directory
-if ! touch /data/.xbslink-ng-healthcheck 2>/dev/null; then
-    bashio::log.fatal "/data is not writable — check add-on storage permissions"
-    exit 1
-fi
-rm -f /data/.xbslink-ng-healthcheck
-mkdir -p /data/.xbslink-ng
-bashio::log.debug "Config directory /data/.xbslink-ng is ready"
 
 # Declare variables
 declare mode
@@ -44,18 +26,6 @@ log_level=$(bashio::config 'log_level')
 stats_interval=$(bashio::config 'stats_interval')
 port=$(bashio::config 'port')
 peer_address=$(bashio::config 'peer_address')
-
-# Verify configured network interface exists
-if ! ip link show "${interface}" > /dev/null 2>&1; then
-    bashio::log.fatal "Network interface '${interface}' not found"
-    bashio::log.info "Available interfaces:"
-    ip -brief link show | while read -r line; do
-        bashio::log.info "  ${line}"
-    done
-    exit 1
-fi
-bashio::log.debug "Interface ${interface} details:"
-bashio::log.debug "$(ip addr show "${interface}")"
 
 # Log startup information
 bashio::log.info "Starting XBSLink-NG..."

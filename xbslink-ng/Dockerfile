@@ -16,16 +16,11 @@ RUN case "${BUILD_ARCH}" in \
       *) echo "Unsupported architecture: ${BUILD_ARCH}" && exit 1 ;; \
     esac && \
     echo "Downloading xbslink-ng ${XBSLINK_VERSION} for linux-${RELEASE_ARCH}..." && \
-    curl -fsSL --retry 3 --retry-delay 5 \
-      "https://github.com/jchadwick/xbslink-ng/releases/download/${XBSLINK_VERSION}/xbslink-ng-linux-${RELEASE_ARCH}.tar.gz" \
-      -o /tmp/xbslink-ng.tar.gz && \
+    curl -fsSL "https://github.com/jchadwick/xbslink-ng/releases/download/${XBSLINK_VERSION}/xbslink-ng-linux-${RELEASE_ARCH}.tar.gz" -o /tmp/xbslink-ng.tar.gz && \
     tar -xzf /tmp/xbslink-ng.tar.gz -C /tmp && \
     mv /tmp/xbslink-ng /usr/local/bin/xbslink-ng && \
     chmod +x /usr/local/bin/xbslink-ng && \
-    rm -f /tmp/xbslink-ng.tar.gz && \
-    xbslink-ng --help > /dev/null 2>&1 && \
-    echo "Binary smoke test passed" && \
-    apk del curl
+    rm -f /tmp/xbslink-ng.tar.gz
 
 # Copy root filesystem
 COPY rootfs /
