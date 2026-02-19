@@ -1,0 +1,50 @@
+name: Update xbslink-ng Binary
+
+on:
+  repository_dispatch:
+    types: [xbslink-release, xbslink-ng-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "xbslink-ng version tag (e.g. v0.0.7)"
+        required: true
+        type: string
+
+jobs:
+  update-binary:
+    name: Update Binary Version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${{ github.event.client_payload.version }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Updating to version: $VERSION"
+
+      - name: Update XBSLINK_VERSION in Dockerfile
+        run: |
+          sed -i "s/ARG XBSLINK_VERSION=.*/ARG XBSLINK_VERSION=${{ steps.version.outputs.version }}/" xbslink-ng/Dockerfile
+          grep XBSLINK_VERSION xbslink-ng/Dockerfile
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add xbslink-ng/Dockerfile
+          if git diff --staged --quiet; then
+            echo "No changes — Dockerfile already at ${{ steps.version.outputs.version }}"
+            exit 0
+          fi
+          git commit -m "fix(xbslink-ng): update binary to ${{ steps.version.outputs.version }}"
+          git push
