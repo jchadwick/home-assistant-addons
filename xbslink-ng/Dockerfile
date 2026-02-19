@@ -6,7 +6,7 @@ FROM ${BUILD_FROM}
 RUN apk add --no-cache libpcap curl mosquitto-clients
 
 # Download prebuilt xbslink-ng binary
-ARG XBSLINK_VERSION=v0.0.5
+ARG XBSLINK_VERSION=v0.0.7
 ARG BUILD_ARCH
 
 # Map Home Assistant arch to release artifact arch
