@@ -38,13 +38,22 @@ jobs:
           grep XBSLINK_VERSION xbslink-ng/Dockerfile
 
       - name: Commit and push
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add xbslink-ng/Dockerfile
           if git diff --staged --quiet; then
             echo "No changes — Dockerfile already at ${{ steps.version.outputs.version }}"
+            echo "changed=false" >> $GITHUB_OUTPUT
             exit 0
           fi
           git commit -m "fix(xbslink-ng): update binary to ${{ steps.version.outputs.version }}"
           git push
+          echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Trigger release
+        if: steps.commit.outputs.changed == 'true'
+        run: gh workflow run release.yaml --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

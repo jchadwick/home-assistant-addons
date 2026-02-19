@@ -7,12 +7,13 @@ on:
       - completed
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   version-and-deploy:
     name: Version Bump & Deploy
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: write
       packages: write
