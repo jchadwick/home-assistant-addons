@@ -4,46 +4,11 @@ All notable changes to this add-on will be documented in this file.
 
 Versioning follows CalVer (YYYY.MM.MICRO).
 
-## [2026.2.14] - 2026-02-23
-
-### Fixed
-- CI build failure where `${XBSLINK_VERSION}` expanded empty in the builder stage
-- Dockerfile stage cleanup to ensure deterministic ARG handling during Home Assistant builder runs
-
-## [2026.2.13] - 2026-02-23
-
-### Fixed
-- CI/release build failure due to glibc-linked prebuilt binary expecting incompatible libc/libpcap ABI on Alpine
-- Docker image now builds `xbslink-ng` from source at the pinned tag, ensuring correct musl/libpcap linkage on all addon architectures
-
-## [2026.2.12] - 2026-02-23
-
-### Fixed
-- Added `libc6-compat` to runtime dependencies so glibc-linked `xbslink-ng` binaries launch correctly on Alpine
-- Added a Docker build-time startup check (`xbslink-ng --help`) to fail fast on incompatible binary/runtime combinations
-
-## [2026.2.11] - 2026-02-19
+## [2026.2.15] - 2026-02-23
 
 ### Changed
-- Auto-deployed from main branch
-
-
-## [2026.2.10] - 2026-02-19
-
-### Changed
-- Auto-deployed from main branch
-
-## [2026.2.9] - 2026-02-19
-
-### Changed
-- Auto-deployed from main branch
-
-
-## [2026.2.8] - 2026-02-09
-
-### Changed
-- Auto-deployed from main branch
-
+- Rollback of `xbslink-ng/` to commit `5e3c187ac538bd077993866177a8af6df6d0ff74`
+- Supersedes versions `2026.2.12` through `2026.2.14`
 
 ## [2026.2.7] - 2026-02-09
 

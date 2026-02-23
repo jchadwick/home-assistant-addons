@@ -1,27 +1,26 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
 ARG BUILD_FROM
-ARG XBSLINK_VERSION=v0.0.10
-
-# Build xbslink-ng from source so it links against Alpine/musl + local libpcap.
-FROM golang:1.25-alpine AS builder
-ARG XBSLINK_VERSION=v0.0.10
-WORKDIR /src
-
-RUN apk add --no-cache build-base libpcap-dev curl && \
-    curl -fsSL "https://github.com/jchadwick/xbslink-ng/archive/refs/tags/${XBSLINK_VERSION}.tar.gz" -o /tmp/xbslink-ng-src.tar.gz && \
-    tar -xzf /tmp/xbslink-ng-src.tar.gz --strip-components=1 -C /src && \
-    rm -f /tmp/xbslink-ng-src.tar.gz && \
-    go build -trimpath -ldflags="-s -w" -o /out/xbslink-ng ./cmd/xbslink-ng
-
 FROM ${BUILD_FROM}
 
 # Install runtime dependencies
 RUN apk add --no-cache libpcap curl mosquitto-clients
 
-COPY --from=builder /out/xbslink-ng /usr/local/bin/xbslink-ng
+# Download prebuilt xbslink-ng binary
+ARG XBSLINK_VERSION=v0.0.5
+ARG BUILD_ARCH
 
-RUN chmod +x /usr/local/bin/xbslink-ng && \
-    /usr/local/bin/xbslink-ng --help >/dev/null
+# Map Home Assistant arch to release artifact arch
+RUN case "${BUILD_ARCH}" in \
+      "amd64") RELEASE_ARCH="amd64" ;; \
+      "aarch64") RELEASE_ARCH="arm64" ;; \
+      *) echo "Unsupported architecture: ${BUILD_ARCH}" && exit 1 ;; \
+    esac && \
+    echo "Downloading xbslink-ng ${XBSLINK_VERSION} for linux-${RELEASE_ARCH}..." && \
+    curl -fsSL "https://github.com/jchadwick/xbslink-ng/releases/download/${XBSLINK_VERSION}/xbslink-ng-linux-${RELEASE_ARCH}.tar.gz" -o /tmp/xbslink-ng.tar.gz && \
+    tar -xzf /tmp/xbslink-ng.tar.gz -C /tmp && \
+    mv /tmp/xbslink-ng /usr/local/bin/xbslink-ng && \
+    chmod +x /usr/local/bin/xbslink-ng && \
+    rm -f /tmp/xbslink-ng.tar.gz
 
 # Copy root filesystem
 COPY rootfs /
