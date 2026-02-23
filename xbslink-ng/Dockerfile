@@ -3,7 +3,8 @@ ARG BUILD_FROM
 FROM ${BUILD_FROM}
 
 # Install runtime dependencies
-RUN apk add --no-cache libpcap curl mosquitto-clients
+# xbslink-ng release binaries are glibc-linked; libc6-compat provides the loader on Alpine.
+RUN apk add --no-cache libpcap curl mosquitto-clients libc6-compat
 
 # Download prebuilt xbslink-ng binary
 ARG XBSLINK_VERSION=v0.0.10
@@ -20,7 +21,8 @@ RUN case "${BUILD_ARCH}" in \
     tar -xzf /tmp/xbslink-ng.tar.gz -C /tmp && \
     mv /tmp/xbslink-ng /usr/local/bin/xbslink-ng && \
     chmod +x /usr/local/bin/xbslink-ng && \
-    rm -f /tmp/xbslink-ng.tar.gz
+    rm -f /tmp/xbslink-ng.tar.gz && \
+    /usr/local/bin/xbslink-ng --help >/dev/null
 
 # Copy root filesystem
 COPY rootfs /

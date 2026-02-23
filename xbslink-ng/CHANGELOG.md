@@ -4,6 +4,12 @@ All notable changes to this add-on will be documented in this file.
 
 Versioning follows CalVer (YYYY.MM.MICRO).
 
+## [2026.2.12] - 2026-02-23
+
+### Fixed
+- Added `libc6-compat` to runtime dependencies so glibc-linked `xbslink-ng` binaries launch correctly on Alpine
+- Added a Docker build-time startup check (`xbslink-ng --help`) to fail fast on incompatible binary/runtime combinations
+
 ## [2026.2.11] - 2026-02-19
 
 ### Changed
@@ -14,7 +20,6 @@ Versioning follows CalVer (YYYY.MM.MICRO).
 
 ### Changed
 - Auto-deployed from main branch
-
 
 ## [2026.2.9] - 2026-02-19
 
