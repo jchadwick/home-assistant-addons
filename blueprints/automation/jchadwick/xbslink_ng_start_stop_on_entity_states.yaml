@@ -1,0 +1,67 @@
+blueprint:
+  name: XBSLink-NG - Start/Stop From Entity States
+  description: >-
+    Starts the XBSLink-NG add-on when one entity reaches a configured state,
+    and stops the add-on when another entity reaches a configured state.
+  domain: automation
+  source_url: https://github.com/jchadwick/home-assistant-addons/blob/main/blueprints/automation/jchadwick/xbslink_ng_start_stop_on_entity_states.yaml
+  author: jchadwick
+
+input:
+  start_entity:
+    name: Start trigger entity
+    description: Entity that will trigger starting XBSLink-NG.
+    selector:
+      entity: {}
+
+  start_state:
+    name: Start trigger state
+    description: State value that starts XBSLink-NG.
+    default: "on"
+    selector:
+      text: {}
+
+  stop_entity:
+    name: Stop trigger entity
+    description: Entity that will trigger stopping XBSLink-NG.
+    selector:
+      entity: {}
+
+  stop_state:
+    name: Stop trigger state
+    description: State value that stops XBSLink-NG.
+    default: "off"
+    selector:
+      text: {}
+
+trigger:
+  - platform: state
+    entity_id: !input start_entity
+    to: !input start_state
+    id: start
+
+  - platform: state
+    entity_id: !input stop_entity
+    to: !input stop_state
+    id: stop
+
+condition: []
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: start
+        sequence:
+          - action: hassio.addon_start
+            data:
+              addon: xbslink-ng
+      - conditions:
+          - condition: trigger
+            id: stop
+        sequence:
+          - action: hassio.addon_stop
+            data:
+              addon: xbslink-ng
+
+mode: single
