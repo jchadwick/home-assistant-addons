@@ -4,6 +4,12 @@ All notable changes to this add-on will be documented in this file.
 
 Versioning follows CalVer (YYYY.MM.MICRO).
 
+## [2026.2.13] - 2026-02-23
+
+### Fixed
+- CI/release build failure due to glibc-linked prebuilt binary expecting incompatible libc/libpcap ABI on Alpine
+- Docker image now builds `xbslink-ng` from source at the pinned tag, ensuring correct musl/libpcap linkage on all addon architectures
+
 ## [2026.2.12] - 2026-02-23
 
 ### Fixed
