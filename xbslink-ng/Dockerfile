@@ -1,12 +1,10 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
 ARG BUILD_FROM
-FROM ${BUILD_FROM}
-
 ARG XBSLINK_VERSION=v0.0.10
 
 # Build xbslink-ng from source so it links against Alpine/musl + local libpcap.
 FROM golang:1.25-alpine AS builder
-ARG XBSLINK_VERSION
+ARG XBSLINK_VERSION=v0.0.10
 WORKDIR /src
 
 RUN apk add --no-cache build-base libpcap-dev curl && \

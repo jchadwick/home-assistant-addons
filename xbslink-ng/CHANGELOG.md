@@ -4,6 +4,12 @@ All notable changes to this add-on will be documented in this file.
 
 Versioning follows CalVer (YYYY.MM.MICRO).
 
+## [2026.2.14] - 2026-02-23
+
+### Fixed
+- CI build failure where `${XBSLINK_VERSION}` expanded empty in the builder stage
+- Dockerfile stage cleanup to ensure deterministic ARG handling during Home Assistant builder runs
+
 ## [2026.2.13] - 2026-02-23
 
 ### Fixed
