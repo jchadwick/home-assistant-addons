@@ -4,6 +4,12 @@ All notable changes to this add-on will be documented in this file.
 
 Versioning follows CalVer (YYYY.MM.MICRO).
 
+## [2026.2.17] - 2026-02-23
+
+### Changed
+- Auto-deployed from main branch
+
+
 ## [2026.2.16] - 2026-02-23
 
 ### Changed
