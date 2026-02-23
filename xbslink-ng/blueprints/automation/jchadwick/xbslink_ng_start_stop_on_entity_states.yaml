@@ -4,7 +4,7 @@ blueprint:
     Starts the XBSLink-NG add-on when one entity reaches a configured state,
     and stops the add-on when another entity reaches a configured state.
   domain: automation
-  source_url: https://github.com/jchadwick/home-assistant-addons/blob/main/blueprints/automation/jchadwick/xbslink_ng_start_stop_on_entity_states.yaml
+  source_url: https://github.com/jchadwick/home-assistant-addons/blob/main/xbslink-ng/blueprints/automation/jchadwick/xbslink_ng_start_stop_on_entity_states.yaml
   author: jchadwick
   input:
     start_entity:
