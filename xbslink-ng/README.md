@@ -40,7 +40,7 @@ Use this automation blueprint to control the `xbslink-ng` add-on from entity sta
 - Start XBSLink-NG when one entity enters a configured state
 - Stop XBSLink-NG when another entity enters a configured state
 
-[![Open your Home Assistant instance and import this blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https://raw.githubusercontent.com/jchadwick/home-assistant-addons/main/xbslink-ng/blueprints/automation/jchadwick/xbslink_ng_start_stop_on_entity_states.yaml)
+[![Open your Home Assistant instance and import this blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https://raw.githubusercontent.com/jchadwick/home-assistant-addons/main/xbslink-ng/blueprints/automation/xbslink-ng/xbslink_ng_start_stop_on_entity_states.yaml)
 
 ### Install the Blueprint
 
